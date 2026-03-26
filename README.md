@@ -112,12 +112,12 @@ Share files with **anyone in the world** — no router configuration needed, no 
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    YOUR COMPUTER                          │
+│                    YOUR COMPUTER                        │
 │                                                         │
-│   ┌─────────────┐      ┌──────────────┐                │
-│   │   Server    │──────│  Bore Tunnel │─────► INTERNET │
-│   │  (Port 5000)│      │              │                │
-│   └─────────────┘      └──────────────┘                │
+│   ┌─────────────┐      ┌──────────────┐                 │
+│   │   Server    │──────│  Bore Tunnel │─────► INTERNET  │
+│   │  (Port 5000)│      │              │                 │
+│   └─────────────┘      └──────────────┘                 │
 │                               │                         │
 │                         Public URL                      │
 │                    bore.pub:xxxxx                       │

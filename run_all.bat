@@ -11,10 +11,8 @@ echo ========================================
 echo.
 echo  1. Run Server (must run first)
 echo  2. Run Client Launcher
-echo  3. Run Client (connect mode)
-echo  4. Run All (Server + Client)
-echo  5. Compile All
-echo  6. Clean Build
+echo  3. Compile All
+echo  4. Clean Build
 echo  0. Exit
 echo.
 echo ========================================
@@ -24,10 +22,8 @@ set /p choice="Enter your choice: "
 
 if "%choice%"=="1" goto run_server
 if "%choice%"=="2" goto run_launcher
-if "%choice%"=="3" goto run_client
-if "%choice%"=="4" goto run_all
-if "%choice%"=="5" goto compile_all
-if "%choice%"=="6" goto clean
+if "%choice%"=="3" goto compile_all
+if "%choice%"=="4" goto clean
 if "%choice%"=="0" goto cleanup_exit
 
 echo Invalid choice. Press any key to continue...
@@ -48,24 +44,6 @@ cd /d "%~dp0Client_Machine"
 start "Client Launcher" cmd /k "call run_launcher.bat"
 echo Client Launcher started in a new window.
 timeout /t 2 >nul
-goto menu
-
-:run_client
-echo Starting Client in connect mode...
-cd /d "%~dp0Client_Machine"
-start "Client" cmd /k "call run_client.bat"
-echo Client started in a new window.
-timeout /t 2 >nul
-goto menu
-
-:run_all
-echo Starting both Server and Client...
-cd /d "%~dp0Server_Machine"
-start "Server" cmd /k "call run_server.bat"
-timeout /t 2 >nul
-cd /d "%~dp0Client_Machine"
-start "Client" cmd /k "call run_client.bat"
-echo All components started.
 goto menu
 
 :compile_all

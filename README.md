@@ -328,7 +328,7 @@ docker build --no-cache -t phantom-transfer-server:latest .
 
 ## ✦ License
 
-Released under the [MIT License](LICENSE).
+Released under the License of "I am a 17yo releasing real Projects while your grown ass wastes time"
 
 ---
 

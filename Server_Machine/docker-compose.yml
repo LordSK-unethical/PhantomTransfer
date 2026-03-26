@@ -7,3 +7,15 @@ services:
     volumes:
       - ./rooms:/app/rooms
     restart: unless-stopped
+
+  transfer-server-bore:
+    image: phantom-transfer-server:latest
+    container_name: Phantom-Transfer-Bore
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./rooms:/app/rooms
+    restart: unless-stopped
+    profiles:
+      - bore
+    command: sh -c "java -cp . server.ServerMain & echo 'Starting bore tunnel...' && bore local 5000 --to bore.pub"

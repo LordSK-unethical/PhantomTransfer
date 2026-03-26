@@ -28,7 +28,7 @@ if "%choice%"=="3" goto run_client
 if "%choice%"=="4" goto run_all
 if "%choice%"=="5" goto compile_all
 if "%choice%"=="6" goto clean
-if "%choice%"=="0" exit
+if "%choice%"=="0" goto cleanup_exit
 
 echo Invalid choice. Press any key to continue...
 pause >nul
@@ -108,3 +108,10 @@ echo.
 echo All cleaned.
 pause
 goto menu
+
+:cleanup_exit
+echo Closing all opened windows...
+taskkill /FI "WINDOWTITLE eq Server*" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq Client*" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq Client Launcher*" /F >nul 2>&1
+exit

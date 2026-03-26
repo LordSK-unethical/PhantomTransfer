@@ -58,6 +58,7 @@ public class RoomManager {
         Room room = rooms.remove(code);
         if (room == null) return;
         for (ClientHandler ch : new ArrayList<>(room.members)) {
+            if (ch == room.host) continue;
             try {
                 ch.onRoomDestroyed();
             } catch (Exception ignored) {

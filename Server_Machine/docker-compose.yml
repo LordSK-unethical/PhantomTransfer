@@ -1,0 +1,9 @@
+services:
+  transfer-server:
+    image: phantom-transfer-server:latest
+    container_name: Phantom-Transfer-Server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./rooms:/app/rooms
+    restart: unless-stopped

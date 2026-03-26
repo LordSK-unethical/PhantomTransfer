@@ -9,10 +9,12 @@ echo ========================================
 echo     Transfer Project - Main Menu
 echo ========================================
 echo.
-echo  1. Run Server (must run first)
-echo  2. Run Client Launcher
-echo  3. Compile All
-echo  4. Clean Build
+echo  1. Run Server (Local)
+echo  2. Run Server (Docker)
+echo  3. Stop Docker Server
+echo  4. Run Client Launcher
+echo  5. Compile All
+echo  6. Clean Build
 echo  0. Exit
 echo.
 echo ========================================
@@ -21,9 +23,11 @@ echo.
 set /p choice="Enter your choice: "
 
 if "%choice%"=="1" goto run_server
-if "%choice%"=="2" goto run_launcher
-if "%choice%"=="3" goto compile_all
-if "%choice%"=="4" goto clean
+if "%choice%"=="2" goto run_docker
+if "%choice%"=="3" goto stop_docker
+if "%choice%"=="4" goto run_launcher
+if "%choice%"=="5" goto compile_all
+if "%choice%"=="6" goto clean
 if "%choice%"=="0" goto cleanup_exit
 
 echo Invalid choice. Press any key to continue...
@@ -31,11 +35,27 @@ pause >nul
 goto menu
 
 :run_server
-echo Starting Server...
+echo Starting Server (Local)...
 cd /d "%~dp0Server_Machine"
 start "Server" cmd /k "call run_server.bat"
 echo Server started in a new window.
 timeout /t 2 >nul
+goto menu
+
+:run_docker
+echo Starting Server (Docker)...
+cd /d "%~dp0Server_Machine"
+start "Docker Server" cmd /k "docker compose up -d --build && docker compose logs -f"
+echo Docker server started.
+timeout /t 2 >nul
+goto menu
+
+:stop_docker
+echo Stopping Docker Server...
+cd /d "%~dp0Server_Machine"
+docker compose down
+echo Docker server stopped.
+pause
 goto menu
 
 :run_launcher

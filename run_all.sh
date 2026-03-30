@@ -1,38 +1,24 @@
 #!/bin/bash
 
-echo "========================================"
-echo "    Transfer Project - Main Menu"
-echo "========================================"
-echo ""
-echo " 1. Run Server (Local)"
-echo " 2. Run Server (Docker)"
-echo " 3. Stop Docker Server"
-echo " 4. Run Server + Bore Tunnel (Local)"
-echo " 5. Run Server + Bore Tunnel (Docker)"
-echo " 6. Stop Docker Bore Tunnel"
-echo " 7. Run Client Launcher"
-echo " 8. Compile All"
-echo " 9. Clean Build"
-echo " 0. Exit"
-echo ""
-echo "========================================"
-echo ""
-
-read -p "Enter your choice: " choice
-
-case $choice in
-    1) run_server ;;
-    2) run_docker ;;
-    3) stop_docker ;;
-    4) run_server_bore ;;
-    5) run_docker_bore ;;
-    6) stop_docker_bore ;;
-    7) run_launcher ;;
-    8) compile_all ;;
-    9) clean ;;
-    0) cleanup_exit ;;
-    *) echo "Invalid choice."; read -p "Press Enter to continue..."; run_all ;;
-esac
+show_menu() {
+    echo "========================================"
+    echo "    Transfer Project - Main Menu"
+    echo "========================================"
+    echo ""
+    echo " 1. Run Server (Local)"
+    echo " 2. Run Server (Docker)"
+    echo " 3. Stop Docker Server"
+    echo " 4. Run Server + Bore Tunnel (Local)"
+    echo " 5. Run Server + Bore Tunnel (Docker)"
+    echo " 6. Stop Docker Bore Tunnel"
+    echo " 7. Run Client Launcher"
+    echo " 8. Compile All"
+    echo " 9. Clean Build"
+    echo " 0. Exit"
+    echo ""
+    echo "========================================"
+    echo ""
+}
 
 run_server() {
     echo "Starting Server (Local)..."
@@ -40,7 +26,7 @@ run_server() {
     ./run_server.sh &
     echo "Server started."
     read -p "Press Enter to continue..."
-    run_all
+    main
 }
 
 run_docker() {
@@ -55,7 +41,7 @@ stop_docker() {
     cd "$(dirname "$0")/Server_Machine"
     docker compose down
     read -p "Press Enter to continue..."
-    run_all
+    main
 }
 
 run_server_bore() {
@@ -64,7 +50,7 @@ run_server_bore() {
     ./run_server_bore.sh &
     echo "Server with bore tunnel started."
     read -p "Press Enter to continue..."
-    run_all
+    main
 }
 
 run_docker_bore() {
@@ -80,7 +66,7 @@ stop_docker_bore() {
     docker compose stop transfer-server-bore
     docker compose rm -f transfer-server-bore
     read -p "Press Enter to continue..."
-    run_all
+    main
 }
 
 run_launcher() {
@@ -89,7 +75,7 @@ run_launcher() {
     ./run_launcher.sh &
     echo "Client Launcher started."
     read -p "Press Enter to continue..."
-    run_all
+    main
 }
 
 compile_all() {
@@ -99,25 +85,25 @@ compile_all() {
     if [ $? -ne 0 ]; then
         echo "Server compilation failed!"
         read -p "Press Enter to continue..."
-        run_all
+        main
     fi
     echo "Server compiled successfully."
     echo ""
 
     echo "Compiling Client..."
     cd "$(dirname "$0")/Client_Machine"
-    javac client/*.java
+    javac client/*.java client/*/*.java
     if [ $? -ne 0 ]; then
         echo "Client compilation failed!"
         read -p "Press Enter to continue..."
-        run_all
+        main
     fi
     echo "Client compiled successfully."
     echo ""
 
     echo "All compilation completed."
     read -p "Press Enter to continue..."
-    run_all
+    main
 }
 
 clean() {
@@ -130,12 +116,13 @@ clean() {
     cd "$(dirname "$0")/Client_Machine"
     rm -f *.class
     rm -f client/*.class
+    rm -f client/*/*.class
     echo "Client cleaned."
     echo ""
 
     echo "All cleaned."
     read -p "Press Enter to continue..."
-    run_all
+    main
 }
 
 cleanup_exit() {
@@ -146,4 +133,23 @@ cleanup_exit() {
     exit 0
 }
 
-run_all
+main() {
+    show_menu
+    read -p "Enter your choice: " choice
+
+    case $choice in
+        1) run_server ;;
+        2) run_docker ;;
+        3) stop_docker ;;
+        4) run_server_bore ;;
+        5) run_docker_bore ;;
+        6) stop_docker_bore ;;
+        7) run_launcher ;;
+        8) compile_all ;;
+        9) clean ;;
+        0) cleanup_exit ;;
+        *) echo "Invalid choice."; read -p "Press Enter to continue..."; main ;;
+    esac
+}
+
+main

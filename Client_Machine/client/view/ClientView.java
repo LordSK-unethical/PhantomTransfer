@@ -63,7 +63,7 @@ public class ClientView extends JFrame {
         gbc.gridx = 0; gbc.gridy = 0;
         panel.add(new JLabel("Server IP:"), gbc);
         gbc.gridx = 1;
-        ipField = new JTextField("10.29.209.230", 15);
+        ipField = new JTextField("", 15);
         panel.add(ipField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;

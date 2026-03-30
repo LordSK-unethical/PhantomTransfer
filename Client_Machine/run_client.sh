@@ -7,7 +7,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-ip="127.0.0.1"
+ip="100.94.45.21"
 
 echo "Starting Client connecting to $ip:5000..."
 java client.ClientMain $ip 5000

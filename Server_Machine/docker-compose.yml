@@ -1,21 +1,30 @@
 services:
   transfer-server:
-    image: phantom-transfer-server:latest
-    container_name: Phantom-Transfer-Server
-    ports:
-      - "5000:5000"
+    build: .
+    image: phantom-transfer-server-tailscale:latest
+    container_name: phantom-transfer-server-tailscale
     volumes:
       - ./rooms:/app/rooms
+      - tailscale-state:/var/lib/tailscale
     restart: unless-stopped
+    expose:
+      - "5000"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_AUTH_KEY=${TS_AUTH_KEY:-}
+    command: >
+      sh -c '
+        tailscaled &
+        sleep 2 &&
+        tailscale up --authkey="$$TS_AUTH_KEY" --accept-routes 2>/dev/null || tailscale up --accept-routes 2>/dev/null &&
+        echo "Server IP: $$(tailscale ip -4)" &&
+        java -cp . server.ServerMain
+      '
 
-  transfer-server-bore:
-    image: phantom-transfer-server:latest
-    container_name: Phantom-Transfer-Bore
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./rooms:/app/rooms
-    restart: unless-stopped
-    profiles:
-      - bore
-    command: sh -c "java -cp . server.ServerMain & echo 'Starting bore tunnel...' && bore local 5000 --to bore.pub"
+volumes:
+  tailscale-state:

@@ -1,6 +1,8 @@
 #!/bin/bash
 echo "Compiling Client..."
-javac client/*.java
+rm -rf classes
+mkdir classes
+javac -d classes -sourcepath . client/*.java client/model/*.java client/view/*.java client/controller/*.java client/network/*.java client/util/*.java
 if [ $? -ne 0 ]; then
     echo "Compilation failed!"
     read -p "Press Enter to exit..."
@@ -8,4 +10,4 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Starting Client Launcher..."
-java client.ClientLauncher
+java -cp classes client.ClientLauncher

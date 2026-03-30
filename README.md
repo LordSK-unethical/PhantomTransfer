@@ -25,9 +25,8 @@ phantom-transfer/
 │   ├── server/                     # Java source code
 │   ├── rooms/                      # Room file storage
 │   ├── Dockerfile                  # Docker image definition
-│   ├── docker-compose.yml          # Docker Compose config
-│   ├── run_server.bat              # Run server locally
-│   └── run_server_bore.bat        # Run server with Bore tunnel
+│   ├── docker-compose.yml          # Docker Compose config with Tailscale
+│   └── run_server.bat             # Run server locally
 │
 └── 🚀 run_all.bat                  # Main menu launcher
 ```
@@ -44,7 +43,7 @@ phantom-transfer/
 | 🔄 **Auto-Refresh** | File lists update automatically every 5 seconds |
 | 🐳 **Docker Support** | Deploy server as a containerized service |
 | 🌐 **LAN Sharing** | Share files with anyone on your local network |
-| 🌍 **Global Access** | Share files with anyone around the world via Bore tunnel |
+| 🌍 **Global Access** | Share files with anyone around the world via Tailscale |
 
 ---
 
@@ -60,11 +59,11 @@ run_all.bat
 | Use Case | Recommended Option |
 |----------|-------------------|
 | Share on **same network** | Option 1 (Local) or 2 (Docker) |
-| Share with **anyone globally** | Option 4 (Local) or 5 (Docker + Bore) |
+| Share with **anyone globally** | Option 2 (Docker + Tailscale) |
 
 ### 3. Connect the Client
 ```bat
-# Option 7 in menu
+# Option 4 in menu
 run_launcher.bat
 ```
 
@@ -104,9 +103,9 @@ docker compose up -d
 
 ---
 
-### 🌍 Mode 3 — Global Access (Bore Tunnel)
+### 🌍 Mode 3 — Global Access (Tailscale)
 
-Share files with **anyone in the world** — no router configuration needed, no accounts required.
+Share files with **anyone in the world** using Tailscale VPN.
 
 #### How It Works
 
@@ -115,66 +114,46 @@ Share files with **anyone in the world** — no router configuration needed, no 
 │                    YOUR COMPUTER                        │
 │                                                         │
 │   ┌─────────────┐      ┌──────────────┐                 │
-│   │   Server    │──────│  Bore Tunnel │─────► INTERNET  │
+│   │   Server    │──────│  Tailscale    │─────► INTERNET  │
 │   │  (Port 5000)│      │              │                 │
 │   └─────────────┘      └──────────────┘                 │
 │                               │                         │
-│                         Public URL                      │
-│                    bore.pub:xxxxx                       │
+│                         Tailscale IP                    │
 └─────────────────────────────────────────────────────────┘
 ```
 
-#### Step 1: Install Bore
+#### Step 1: Get Tailscale Auth Key
 
-**Windows:**
-```powershell
-# Download from GitHub releases
-iwr https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-pc-windows-msvc.zip -OutFile bore.zip
-Expand-Archive bore.zip -DestinationPath C:\bore
-# Add to PATH or use full path
-```
+1. Create account at https://login.tailscale.com
+2. Go to **Settings → Keys → Generate auth key**
+3. Copy the auth key (starts with `tskey-auth-`)
 
-**Linux/Mac:**
+#### Step 2: Configure Environment
+
 ```bash
-# Using cargo
-cargo install bore-cli
-
-# Or download binary
-curl -fsSL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz | tar -xz
-./bore local 5000 --to bore.pub
-```
-
-#### Step 2: Start Server + Bore
-
-**Option A — Local**
-```bash
-# Option 4 in menu
 cd Server_Machine
-run_server_bore.bat
+cp .env.example .env
+# Edit .env and add your TS_AUTH_KEY
 ```
 
-**Option B — Docker (no installation needed)**
+#### Step 3: Build & Start
+
 ```bash
-# Option 5 in menu
-cd Server_Machine
-docker compose up -d --profile bore
-docker compose logs -f transfer-server-bore
-```
+# Build the Docker image
+./build_docker.sh
 
-#### Step 3: Get the Public URL
+# Start with Tailscale
+docker compose up -d
 
-Bore will display a URL like:
-```
-listening on bore.pub:xxxxx
+# Check logs for Tailscale IP
+docker logs phantom-transfer-server-TailScale
 ```
 
 #### Step 4: Connect Clients
 
-Share the bore.pub URL with anyone globally.
-
-**Client:**
-- **IP:** `bore.pub`
-- **Port:** The port number shown (e.g., `xxxxx`)
+1. Install Tailscale on client machine
+2. Connect to your tailnet
+3. Enter the server's Tailscale IP on port `5000`
 
 ---
 
@@ -185,12 +164,9 @@ Share the bore.pub URL with anyone globally.
 | `1` | Run Server (Local) | LAN sharing |
 | `2` | Run Server (Docker) | LAN sharing (Docker) |
 | `3` | Stop Docker Server | Stop Docker server |
-| `4` | Run Server + Bore Tunnel (Local) | 🌐 Global sharing |
-| `5` | Run Server + Bore Tunnel (Docker) | 🌐 Global sharing (Docker) |
-| `6` | Stop Docker Bore Tunnel | Stop bore tunnel server |
-| `7` | Run Client Launcher | Connect to server |
-| `8` | Compile All | Rebuild Java code |
-| `9` | Clean Build | Remove compiled files |
+| `4` | Run Client Launcher | Connect to server |
+| `5` | Compile All | Rebuild Java code |
+| `6` | Clean Build | Remove compiled files |
 | `0` | Exit | Close all windows |
 
 ---
@@ -205,9 +181,14 @@ ipconfig
 ```
 Look for `IPv4 Address` under your active adapter.
 
-**Linux:**
+### Tailscale IP
+
 ```bash
-ip addr show
+# On server
+docker exec phantom-transfer-server-TailScale tailscale ip -4
+
+# Or on host with Tailscale installed
+tailscale ip -4
 ```
 
 ---
@@ -219,7 +200,6 @@ ip addr show
 | Port | `5000` | Server listening port |
 | Max File Size | `10 GB` | Per-upload size limit |
 | Refresh Interval | `5 sec` | Auto-refresh timer |
-| Bore Tunnel Server | `bore.pub` | Public tunnel server |
 
 ---
 
@@ -228,7 +208,8 @@ ip addr show
 | Deployment | IP Address | Port |
 |------------|------------|------|
 | Local Server | `192.168.x.x` (LAN IP) | `5000` |
-| Bore Tunnel | `bore.pub` | `xxxxx` (from bore output) |
+| Docker Server | `192.168.x.x` (LAN IP) | `5000` |
+| Tailscale | Server's Tailscale IP | `5000` |
 
 ---
 
@@ -238,10 +219,9 @@ ip addr show
 - Server and clients on the **same network**
 - Port `5000` open on server machine firewall
 
-### For Global Sharing (Bore)
-- Internet connection
-- Bore installed (for local mode only)
-- No router configuration needed
+### For Global Sharing (Tailscale)
+- Tailscale installed on both server and client
+- Valid auth key configured
 
 ---
 
@@ -250,12 +230,12 @@ ip addr show
 > ⚠️ **Important:** This application has **no authentication**.
 
 - Anyone with the IP/URL can connect
-- No encryption on file transfers
+- No encryption on file transfers (within Tailscale VPN is encrypted)
 - Suitable for trusted networks or temporary sharing
 
 ### Recommendations
 
-1. **Use Bore tunnel** for temporary, controlled sharing
+1. **Use Tailscale** for encrypted, controlled sharing
 2. **Destroy rooms** after use
 3. **Firewall** restricts who can connect
 
@@ -276,14 +256,14 @@ ip addr show
 </details>
 
 <details>
-<summary><strong>Bore Not Working</strong></summary>
+<summary><strong>Tailscale Not Connecting</strong></summary>
 
-1. Make sure Bore is installed correctly
-2. Check if `bore.pub` is accessible
-3. Try a different tunnel command:
+1. Make sure `TS_AUTH_KEY` is set correctly in `.env`
+2. Check container logs:
    ```bash
-   bore local 5000 --to bore.pub
+   docker logs phantom-transfer-server-TailScale
    ```
+3. Verify your auth key is valid at https://login.tailscale.com/admin/settings/keys
 
 </details>
 
@@ -291,8 +271,7 @@ ip addr show
 <summary><strong>Docker Container Not Starting</strong></summary>
 
 ```bash
-docker logs Phantom-Transfer-Server
-docker logs Phantom-Transfer-Bore
+docker logs phantom-transfer-server-TailScale
 ```
 
 Check for port conflicts:
@@ -308,7 +287,7 @@ netstat -an | grep 5000
 ```bash
 docker system prune -a
 cd Server_Machine
-docker build --no-cache -t phantom-transfer-server:latest .
+./build_docker.sh
 ```
 
 </details>
@@ -320,8 +299,8 @@ docker build --no-cache -t phantom-transfer-server:latest .
 | Requirement | Version | Notes |
 |-------------|---------|-------|
 | Java | 17+ | Required |
-| Bore | Latest | Global tunnel mode only |
-| Docker | Latest | Containerized server |
+| Docker | Latest | Containerized server with Tailscale |
+| Tailscale | Latest | Global access (Docker image includes Tailscale) |
 | OS | Windows 10/11 or Linux | |
 
 ---
